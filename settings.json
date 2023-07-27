@@ -1,0 +1,9 @@
+{
+    "apiDocumentationEnabled":true,
+    "maxPeers": 140,
+    "apiRestricted": false,
+    "minOutboundPeers": 25,
+    "maxNetworkThreadPoolSize": 800,
+    "repositoryConnectionPoolSize": 1500
+}
+
