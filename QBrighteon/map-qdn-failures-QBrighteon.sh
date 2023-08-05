@@ -2,9 +2,9 @@
 # This script is utilized for mapping failures from the 'qdn-fail' folder's 'log.txt'. This script is for QBrighteon published files only. Its name should be 'map-qdn-failures-QBrighteon.sh'.
 
 echo "-----grabbing python script for mapping qdn-fail log, making executable, and placing in correct location..."
-wget https://raw.githubusercontent.com/crowetic/publishing-suite/main/QBrighteon/map-qdn-fail.py 
-chmod +x map-qdn-fail.py
-mv map-qdn-fail.py publish-failed/qdn-fail/
+wget https://raw.githubusercontent.com/crowetic/publishing-suite/main/QBrighteon/map-qdn-fail-QBrighteon.py 
+chmod +x map-qdn-fail-QBrighteon.py
+mv map-qdn-fail-QBrighteon.py publish-failed/qdn-fail/
 
 # check for existing instructions so we don't duplicate them...
 if [[ -f "QDN-FAIL-INSTRUCTIONS.txt" ]]; then
@@ -14,16 +14,41 @@ fi
 echo "-----executing map-qdn-fail.py to create 'output.txt' in qdn-fail folder..."
 
 cd publish-failed/qdn-fail
-python3 map-qdn-fail.py
+python3 map-qdn-fail-QBrighteon.py
 cd ../..
 
-echo "-----created 'output.txt' for 'already-mapped-full-republish.sh' script. You can now execute the 'already-mapped-full-republish.sh' script from channel directory, and it will publish the failed files again utilizing the existing full_identifier, remember to pass the correct inputs to the already-mapped script EXAMPLE: './already-mapped-full-republish -b -i bteon_vid' - this example will publish utilizing the 'bad-publish-mapping' method (script will automatically take care of renaming the output.txt from python script) and execute the call with the 'initial_identifier' of 'bteon_vid' (which is what all QBrighteon publishing uses for primary identifier."
+echo "-----"
+echo "-----"
+echo "-----created 'output.txt' for 'already-mapped-full-republish.sh' script. WILL NOW EXECUTE REPUBLISH SCRIPT AND CREATE QDN-FAIL-INSTRUCTIONS.txt in case something goes wrong to follow logic..."
+echo "-----"
+echo "-----"
 
-echo "-----sleeping for 10 seconds to give enough time to read the above information... and creating 'QDN-FAIL-INSTRUCTIONS.txt' (if they don't already exist) explaining what to do."
-sleep 10
 
 if [[ ${instructions_existing} == 1 ]]; then
-     exit 1
+    options=("Yes - MAINNET" "Yes - TESTNET" "Exit")
+
+    PS3="Select an option: "
+
+    select opt in "${options[@]}"; do
+        case $opt in
+            "Yes - MAINNET")
+                echo "--!!--Executing MAINNET './already-mapped-full-republish.sh -b -i bteon_vid' command...--!!--"
+                ./already-mapped-full-republish.sh -b -i bteon_vid
+                break
+                ;;
+            "Yes - TESTNET")
+                echo "--!!--Executing TESTNET './already-mapped-full-republish.sh -b -t -i bteon_vid' command...--!!--"
+                ./already-mapped-full-republish.sh -b -t -i bteon_vid
+                break
+                ;;
+            "Exit")
+                echo "Exiting... Read the 'QDN-FAIL-INSTRUCTIONS.txt' file for more details..."
+                break
+                ;;
+            *) echo "Invalid option. Try again.";;
+        esac
+    done
+     
 else 
 
     echo "-----to fix failed qdn publish from the 'publish-failed/qdn-fail' failures-----" >> "QDN-FAIL-INSTRUCTIONS.txt"
@@ -64,6 +89,30 @@ else
     echo "     -----     " >> "QDN-FAIL-INSTRUCTIONS.txt"
     echo "     -----     -----     -----     -----     -----     -----" >> "QDN-FAIL-INSTRUCTIONS.txt"
     echo "Once you have run './already-mapped-full-republish.sh -b -i bteon_vid' the rest should be taken care of automatically, and your files should be republished correctly." >> "QDN-FAIL-INSTRUCTIONS.txt"
+    
+options=("Yes - MAINNET" "Yes - TESTNET" "Exit")
+
+PS3="Select an option: "
+
+select opt in "${options[@]}"; do
+    case $opt in
+        "Yes - MAINNET")
+            echo "--!!--Executing MAINNET './already-mapped-full-republish.sh -b -i bteon_vid' command...--!!--"
+            ./already-mapped-full-republish.sh -b -i bteon_vid
+            break
+            ;;
+        "Yes - TESTNET")
+            echo "--!!--Executing TESTNET './already-mapped-full-republish.sh -b -t -i bteon_vid' command...--!!--"
+            ./already-mapped-full-republish.sh -b -t -i bteon_vid
+            break
+            ;;
+        "Exit")
+            echo "Exiting... Read the 'QDN-FAIL-INSTRUCTIONS.txt' file for more details..."
+            break
+            ;;
+        *) echo "Invalid option. Try again.";;
+    esac
+done
 
 fi
 
