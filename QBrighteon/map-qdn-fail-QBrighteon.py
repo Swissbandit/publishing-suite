@@ -18,21 +18,28 @@ with open(output_file, "w") as out_f:
         error = False
         
         for line in lines:
-            if line.startswith("bteon_vid"):
+            parts = line.split(" | ")
+        
+            if line.startswith("bteon_vid") and len(parts) >= 2:
+                if len(parts) == 2:
+                    identifier = parts[0].strip()
+                    
+            elif line.startswith("bteon_vid") and len(parts) <= 1:
                 identifier = line.strip()
-            elif "https://www.brighteon.com" in line:
+                
+            elif line.startswith("https://www.brighteon.com") and len(parts) <= 1:
                 link = line.strip()
-            elif "Error" in line:
-                error = True
-            elif line.startswith("PATH type specified"):
-                error = False
+                    
+            elif line.startswith("Transaction broadcast successfully") and len(parts) >= 2:
+                if len(parts) == 2:
+                    link = parts[1].strip()
         
         if identifier and link and not identifier_dict.get(identifier):
             identifier_dict[identifier] = True
             
             if error:
-                out_f.write(f"{identifier} | {link}\n")
-                print(f"Found Error:\n  Identifier: {identifier}\n  Link: {link}\n")
+                #out_f.write(f"{identifier} | {link}\n")
+                print(f"Found Error, Skipping:\n  Identifier: {identifier}\n  Link: {link}\n")
             else:
                 out_f.write(f"{identifier} | {link}\n")
                 print(f"Found Identifier and Link:\n  Identifier: {identifier}\n  Link: {link}\n")
@@ -42,4 +49,3 @@ with open(output_file, "w") as out_f:
             print()
 
 print("Extraction complete. Output saved to", output_file)
-
